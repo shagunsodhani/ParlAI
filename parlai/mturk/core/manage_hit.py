@@ -153,33 +153,33 @@ def create_hits(opt, task_config, task_module_name, bot, chat_page_only=False):
             conversation_id = int(conversation_id)
             if conversation_id in conversations_remaining and len(new_messages) > 0:
                 agent = bots[cid_map[conversation_id]]
-                for new_message in new_messages:
-                    if verbose:
-                        print('Conversation '+str(conversation_id)+' - Bot received: ' + str(new_message))
-                    logs[conversation_id].append(new_message)
-                    agent.observe(new_message)
-                    if new_message.get('episode_done', False) or c_done_map[conversation_id]:
-                        # We're done here
-                        conversations_remaining.remove(conversation_id)
-                        print('Conversation '+str(conversation_id)+' is DONE!\n')
-                    else:
-                        # Agent still needs to reply
-                        response = agent.act()
-                        if response:
-                            if response.get('episode_done', False):
-                                c_done_map[conversation_id] = True
-                            if verbose:
-                                print('Conversation '+str(conversation_id)+' - Bot says: ' + str(response))
-                            logs[conversation_id].append(response)
-                            _send_new_message(
-                                json_api_endpoint_url=json_api_endpoint_url,
-                                task_group_id=task_group_id,
-                                conversation_id=conversation_id,
-                                agent_id=bot_agent_id,
-                                message_text=response.get('text', None),
-                                reward=response.get('reward', None),
-                                episode_done=response.get('episode_done', False),
-                            )
+                new_message = new_messages[0]
+                if verbose:
+                    print('Conversation '+str(conversation_id)+' - Bot received: ' + str(new_message))
+                logs[conversation_id].append(new_message)
+                agent.observe(new_message)
+                if new_message.get('episode_done', False) or c_done_map[conversation_id]:
+                    # We're done here
+                    conversations_remaining.remove(conversation_id)
+                    print('Conversation '+str(conversation_id)+' is DONE!\n')
+                else:
+                    # Agent still needs to reply
+                    response = agent.act()
+                    if response:
+                        if response.get('episode_done', False):
+                            c_done_map[conversation_id] = True
+                        if verbose:
+                            print('Conversation '+str(conversation_id)+' - Bot says: ' + str(response))
+                        logs[conversation_id].append(response)
+                        _send_new_message(
+                            json_api_endpoint_url=json_api_endpoint_url,
+                            task_group_id=task_group_id,
+                            conversation_id=conversation_id,
+                            agent_id=bot_agent_id,
+                            message_text=response.get('text', None),
+                            reward=response.get('reward', None),
+                            episode_done=response.get('episode_done', False),
+                        )
 
         # We don't create new HITs until this point, so that the HIT page will always have the conversation fully populated.
         if not hits_created:
